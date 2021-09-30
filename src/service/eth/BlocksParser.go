@@ -62,7 +62,6 @@ func parseBlock(blockNumber int, blocksChan chan BlockWithNumber) {
 }
 
 func getNumberWithBlockMap(ch chan BlockWithNumber, totalBlocks int) map[int]eth.Block {
-	// println("inside getHashWithStatusMap, this will proceed with select/for")
 	numberWithBlockMap := make(map[int]eth.Block)
 
 	for {
