@@ -82,13 +82,10 @@ func (client InfuraClient) BlockByNumber(blockNumber int) eth.Block {
 	}
 
 	jsonStr := string(out)
-	// fmt.Println(jsonStr)
 	var blockResponse BlockResponse
 	if err := json.Unmarshal(makeRequest([]byte(jsonStr)), &blockResponse); err != nil {
 		panic(err)
 	}
-
-	// fmt.Printf("%+v", blockResponse.Result)
 
 	return blockResponse.Result
 }
@@ -111,10 +108,9 @@ type TransactionReceipt struct {
 	Status          string
 }
 
-// https://infura.io/docs/ethereum/json-rpc/eth_getTransactionByHash
+// GetTransactionReceipt https://infura.io/docs/ethereum/json-rpc/eth_getTransactionByHash
 // -d '{"jsonrpc":"2.0","method":"eth_getTransactionByHash","params": ["0xbb3a336e3f823ec18197f1e13ee875700f08f03e2cab75f0d0b118dabb44cba0"],"id":1}'
 func (client InfuraClient) GetTransactionReceipt(hash string) TransactionReceipt {
-	// hash = "0xbb3a336e3f823ec18197f1e13ee875700f08f03e2cab75f0d0b118dabb44cba0"
 	params := []string{hash}
 	b := &TransactionReceiptRequest{"2.0", "eth_getTransactionReceipt", params, 1}
 	out, err := json.Marshal(b)
@@ -123,7 +119,6 @@ func (client InfuraClient) GetTransactionReceipt(hash string) TransactionReceipt
 	}
 
 	jsonStr := string(out)
-	// fmt.Println(jsonStr)
 
 	var r TransactionReceiptResponse
 	if err := json.Unmarshal(makeRequest([]byte(jsonStr)), &r); err != nil {
@@ -147,10 +142,6 @@ type EventLogsResponse struct {
 }
 
 func (client InfuraClient) GetEventLogs(blockHash string) []eth.EventLog {
-	/*params := []interface{}{
-		map[string]string{"blockHash": "0xfc66cc2e39c1537a84e290225f2046dfff565ad6fffe36bda2bb24593e0b6a02"},
-	}*/
-
 	params := []interface{}{
 		map[string]string{"blockHash": blockHash},
 	}
@@ -162,16 +153,11 @@ func (client InfuraClient) GetEventLogs(blockHash string) []eth.EventLog {
 	}
 
 	jsonStr := string(out)
-	// fmt.Println(jsonStr)
-
 	var eventLogsResponse EventLogsResponse
-	// var eventLogsResponse interface{}
 	if err := json.Unmarshal(makeRequest([]byte(jsonStr)), &eventLogsResponse); err != nil {
 		panic(err)
 	}
 
-	// fmt.Println(eventLogsResponse)
-	// os.Exit(1)
 	return eventLogsResponse.Result
 }
 
@@ -189,7 +175,7 @@ func makeRequest(data []byte) []byte {
 	}
 
 	httpClient := &http.Client{
-		Timeout:   time.Duration(1 * time.Hour),
+		Timeout:   1 * time.Hour,
 		Transport: transCfg,
 	}
 	resp, err := httpClient.Do(req)
