@@ -1,10 +1,9 @@
 package main
 
 import (
-	"blockchain/src/migration"
-	"blockchain/src/service/eth"
 	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	"github.com/sitetester/ethereum-blockchain-parser/src/migration"
+	"github.com/sitetester/ethereum-blockchain-parser/src/service/eth"
 )
 
 func main() {

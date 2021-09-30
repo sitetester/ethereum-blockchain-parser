@@ -1,9 +1,9 @@
 package eth
 
 import (
-	"blockchain/src/entity/eth"
 	"fmt"
 	"github.com/jinzhu/gorm"
+	"github.com/sitetester/ethereum-blockchain-parser/src/entity/eth"
 	"strconv"
 )
 

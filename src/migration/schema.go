@@ -1,9 +1,8 @@
 package migration
 
 import (
-	"blockchain/src/entity/eth"
-
 	"github.com/jinzhu/gorm"
+	"github.com/sitetester/ethereum-blockchain-parser/src/entity/eth"
 )
 
 func RunMigrations(db *gorm.DB) {

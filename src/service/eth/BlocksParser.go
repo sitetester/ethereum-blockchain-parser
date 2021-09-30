@@ -1,9 +1,9 @@
 package eth
 
 import (
-	ethEntity "blockchain/src/entity/eth"
-	"blockchain/src/service/eth/client"
 	"fmt"
+	"github.com/sitetester/ethereum-blockchain-parser/src/entity/eth"
+	"github.com/sitetester/ethereum-blockchain-parser/src/service/eth/client"
 	"strconv"
 	"strings"
 )
@@ -21,11 +21,11 @@ type TransactionStatus struct {
 
 type BlockWithNumber struct {
 	Number int
-	Block  ethEntity.Block
+	Block  eth.Block
 }
 
-func (blocksParser BlocksParser) ParseBlocks(blockNumber int) []ethEntity.Block {
-	var parsedBlocks []ethEntity.Block
+func (blocksParser BlocksParser) ParseBlocks(blockNumber int) []eth.Block {
+	var parsedBlocks []eth.Block
 
 	blocksChan := make(chan BlockWithNumber, BlocksChanLength)
 
@@ -46,7 +46,6 @@ func (blocksParser BlocksParser) ParseBlocks(blockNumber int) []ethEntity.Block 
 func parseBlock(blockNumber int, blocksChan chan BlockWithNumber) {
 	var infuraClient client.InfuraClient
 
-	// parsedBlock := infuraClient.BlockByNumber(1415139)
 	parsedBlock := infuraClient.BlockByNumber(blockNumber)
 	parsedBlock.EventLogs = infuraClient.GetEventLogs(parsedBlock.Hash)
 	AdjustBlock(&parsedBlock)
@@ -62,9 +61,9 @@ func parseBlock(blockNumber int, blocksChan chan BlockWithNumber) {
 	blocksChan <- BlockWithNumber{Number: blockNumber, Block: parsedBlock}
 }
 
-func getNumberWithBlockMap(ch chan BlockWithNumber, totalBlocks int) map[int]ethEntity.Block {
+func getNumberWithBlockMap(ch chan BlockWithNumber, totalBlocks int) map[int]eth.Block {
 	// println("inside getHashWithStatusMap, this will proceed with select/for")
-	numberWithBlockMap := make(map[int]ethEntity.Block)
+	numberWithBlockMap := make(map[int]eth.Block)
 
 	for {
 		select {
@@ -78,7 +77,7 @@ func getNumberWithBlockMap(ch chan BlockWithNumber, totalBlocks int) map[int]eth
 	}
 }
 
-func setBlockTransactionsStatus(block ethEntity.Block) {
+func setBlockTransactionsStatus(block eth.Block) {
 	ch := make(chan TransactionStatus, len(block.Transactions))
 
 	for _, transaction := range block.Transactions {
@@ -106,7 +105,7 @@ func fetchTransactionStatus(hash string, ch chan TransactionStatus) {
 // https://tour.golang.org/concurrency/5
 // https://gobyexample.com/select
 // `select` lets us wait/block on channel operations
-func getHashWithStatusMap(ch chan TransactionStatus, block ethEntity.Block) map[string]string {
+func getHashWithStatusMap(ch chan TransactionStatus, block eth.Block) map[string]string {
 	hashWithStatusMap := make(map[string]string)
 
 	for {
@@ -120,7 +119,7 @@ func getHashWithStatusMap(ch chan TransactionStatus, block ethEntity.Block) map[
 	}
 }
 
-func AdjustBlock(block *ethEntity.Block) {
+func AdjustBlock(block *eth.Block) {
 	block.TransactionsCount = len(block.Transactions)
 	block.Number = HexToIntStr(block.Number)
 	block.Timestamp = HexToIntStr(block.Timestamp)
@@ -148,19 +147,19 @@ func HexToIntStr(s string) string {
 	return strconv.FormatInt(iInt64, 10)
 }
 
-func adjustGasValue(transaction ethEntity.Transaction) {
+func adjustGasValue(transaction eth.Transaction) {
 	gasInt, _ := strconv.Atoi(HexToIntStr(transaction.Gas))
 	gasPriceStr := (string)(gasInt / HexToIntDivisor)
 	transaction.Gas = gasPriceStr
 }
 
-func adjustGasPriceValue(transaction ethEntity.Transaction) {
+func adjustGasPriceValue(transaction eth.Transaction) {
 	gasPriceInt, _ := strconv.Atoi(HexToIntStr(transaction.GasPrice))
 	gasPriceStr := (string)(gasPriceInt / HexToIntDivisor)
 	transaction.GasPrice = gasPriceStr
 }
 
-func adjustValueInEither(transaction ethEntity.Transaction) {
+func adjustValueInEither(transaction eth.Transaction) {
 	valueInt, _ := strconv.Atoi(HexToIntStr(transaction.Value))
 	str := (string)(valueInt / HexToIntDivisor)
 

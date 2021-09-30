@@ -1,10 +1,10 @@
 package client
 
 import (
-	ethEntity "blockchain/src/entity/eth"
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
+	"github.com/sitetester/ethereum-blockchain-parser/src/entity/eth"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -53,7 +53,7 @@ type RpcParams struct {
 type BlockResponse struct {
 	Jsonrpc string
 	Id      int
-	Result  ethEntity.Block
+	Result  eth.Block
 }
 
 type BlockByNumberRequest struct {
@@ -70,10 +70,10 @@ func hex(i int) string {
 	return "0x" + str
 }
 
-// https://etherscan.io/block/3415124 - block(3415136) with 2 transactions
+// BlockByNumber https://etherscan.io/block/3415124 - block(3415136) with 2 transactions
 // https://etherscan.io/block/3415124 - block(3415124) with 5 transactions
 // -d '{"jsonrpc":"2.0","method":"eth_getBlockByNumber","params": ["0x5BAD55",false],"id":1}'
-func (client InfuraClient) BlockByNumber(blockNumber int) ethEntity.Block {
+func (client InfuraClient) BlockByNumber(blockNumber int) eth.Block {
 	params := []interface{}{hex(blockNumber), true}
 	b := &BlockByNumberRequest{"2.0", "eth_getBlockByNumber", params, 1}
 	out, err := json.Marshal(b)
@@ -143,10 +143,10 @@ type GetLogsRequest struct {
 type EventLogsResponse struct {
 	Jsonrpc string
 	Method  string
-	Result  []ethEntity.EventLog
+	Result  []eth.EventLog
 }
 
-func (client InfuraClient) GetEventLogs(blockHash string) []ethEntity.EventLog {
+func (client InfuraClient) GetEventLogs(blockHash string) []eth.EventLog {
 	/*params := []interface{}{
 		map[string]string{"blockHash": "0xfc66cc2e39c1537a84e290225f2046dfff565ad6fffe36bda2bb24593e0b6a02"},
 	}*/
@@ -189,7 +189,7 @@ func makeRequest(data []byte) []byte {
 	}
 
 	httpClient := &http.Client{
-		Timeout: time.Duration(1 * time.Hour),
+		Timeout:   time.Duration(1 * time.Hour),
 		Transport: transCfg,
 	}
 	resp, err := httpClient.Do(req)
