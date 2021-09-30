@@ -19,12 +19,8 @@ func (manager ImportManager) ManageImport(db *gorm.DB) {
 	fmt.Printf("lastScannedBlockNumber: %s \n", ethBlock.Number)
 
 	var blockNumber int
-	if len(ethBlock.Number) == 0 {
-		blockNumber = 4415324
-	} else {
-		blockNumberTemp, _ := strconv.Atoi(ethBlock.Number)
-		blockNumber = blockNumberTemp
-	}
+	blockNumberTemp, _ := strconv.Atoi(ethBlock.Number)
+	blockNumber = blockNumberTemp
 
 	parsedBlocks := parser.ParseBlocks(blockNumber + 1)
 	fmt.Printf("\n All blocks parsed!!!\n")
