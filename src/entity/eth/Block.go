@@ -6,12 +6,13 @@ import (
 
 type Block struct {
 	gorm.Model
-	Number            string `gorm:"unique;not null"` // set to unique and not null
-	Hash              string
-	Difficulty        string
-	ExtraData         string `gorm:"type:text;"`
-	GasLimit          string
-	GasUsed           string
+	Number     string `gorm:"unique;not null"` // set to unique and not null
+	NumberInt  int
+	Hash       string
+	Difficulty string
+	ExtraData  string `gorm:"type:text;"`
+	GasLimit   string
+	GasUsed    string
 
 	LogsBloom         string
 	Miner             string
@@ -24,8 +25,7 @@ type Block struct {
 	StateRoot         string
 	Timestamp         string
 	TotalDifficulty   string
-	Transactions      []Transaction
-	EventLogs         []EventLog
+	Transactions      []Transaction `gorm:"foreignKey:BlockNumber"`
+	EventLogs         []EventLog    `gorm:"foreignKey:BlockNumber"`
 	TransactionsCount int
 }
-

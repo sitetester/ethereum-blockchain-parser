@@ -7,6 +7,7 @@ import (
 	"github.com/sitetester/ethereum-blockchain-parser/src/entity/eth"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -15,10 +16,9 @@ import (
 type InfuraClient struct {
 }
 
-const URL = "https://mainnet.infura.io/v3/c8d36b72d2d04f16a94931809cdf6383"
+const URL = "https://mainnet.infura.io/v3/"
 
-type LatestBlockResponse struct {
-}
+type LatestBlockResponse struct{}
 
 type RpcResponse struct {
 	Jsonrpc string
@@ -162,7 +162,12 @@ func (client InfuraClient) GetEventLogs(blockHash string) []eth.EventLog {
 }
 
 func makeRequest(data []byte) []byte {
-	req, err := http.NewRequest("POST", URL, bytes.NewBuffer(data))
+	infuraProjectId, present := os.LookupEnv("INFURA_PROJECT_ID")
+	if !present {
+		panic("\nEnvironment variable `INFURA_PROJECT_ID` not set.")
+	}
+
+	req, err := http.NewRequest("POST", URL+infuraProjectId, bytes.NewBuffer(data))
 	if err != nil {
 		panic(err)
 	}

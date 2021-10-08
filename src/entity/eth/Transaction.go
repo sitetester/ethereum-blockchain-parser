@@ -1,6 +1,9 @@
 package eth
 
+import "gorm.io/gorm"
+
 type Transaction struct {
+	gorm.Model
 	Hash             string `gorm:"unique;not null"` // set to unique and not null
 	BlockNumber      string
 	BlockHash        string

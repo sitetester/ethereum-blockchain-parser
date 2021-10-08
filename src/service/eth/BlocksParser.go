@@ -1,7 +1,6 @@
 package eth
 
 import (
-	"fmt"
 	"github.com/sitetester/ethereum-blockchain-parser/src/entity/eth"
 	"github.com/sitetester/ethereum-blockchain-parser/src/service/eth/client"
 	"strconv"
@@ -9,10 +8,8 @@ import (
 )
 
 const HexToIntDivisor = 1000000000000000000
-const BlocksChanLength = 10
 
-type BlocksParser struct {
-}
+type BlocksParser struct{}
 
 type TransactionStatus struct {
 	Hash   string
@@ -24,17 +21,17 @@ type BlockWithNumber struct {
 	Block  eth.Block
 }
 
-func (blocksParser BlocksParser) ParseBlocks(blockNumber int) []eth.Block {
+func (blocksParser BlocksParser) ParseBlocks(start int, totalBlock int) []eth.Block {
 	var parsedBlocks []eth.Block
 
-	blocksChan := make(chan BlockWithNumber, BlocksChanLength)
+	blocksChan := make(chan BlockWithNumber, totalBlock)
 
 	var i int
-	for i = blockNumber; i < blockNumber+BlocksChanLength; i++ {
+	for i = start; i < start+totalBlock; i++ {
 		go parseBlock(i, blocksChan)
 	}
 
-	blocksHashWithStatusMap := getNumberWithBlockMap(blocksChan, BlocksChanLength)
+	blocksHashWithStatusMap := getNumberWithBlockMap(blocksChan, totalBlock)
 
 	for _, block := range blocksHashWithStatusMap {
 		parsedBlocks = append(parsedBlocks, block)
@@ -48,9 +45,7 @@ func parseBlock(blockNumber int, blocksChan chan BlockWithNumber) {
 
 	parsedBlock := infuraClient.BlockByNumber(blockNumber)
 	parsedBlock.EventLogs = infuraClient.GetEventLogs(parsedBlock.Hash)
-	AdjustBlock(&parsedBlock)
-
-	fmt.Printf("\n %s %d %d", "len(parsedBlock.Transactions) for ", blockNumber, len(parsedBlock.Transactions))
+	adjustBlock(&parsedBlock)
 
 	if len(parsedBlock.Transactions) > 0 {
 		setBlockTransactionsStatus(parsedBlock)
@@ -118,14 +113,13 @@ func getHashWithStatusMap(ch chan TransactionStatus, block eth.Block) map[string
 	}
 }
 
-func AdjustBlock(block *eth.Block) {
+func adjustBlock(block *eth.Block) {
 	block.TransactionsCount = len(block.Transactions)
-	block.Number = HexToIntStr(block.Number)
-	block.Timestamp = HexToIntStr(block.Timestamp)
+	block.NumberInt = hexToInt(block.Number)
 
 	for i := 0; i < len(block.Transactions); i++ {
 		transaction := &block.Transactions[i]
-		transaction.BlockNumber = HexToIntStr(transaction.BlockNumber)
+		transaction.BlockNumber = hexToIntStr(transaction.BlockNumber)
 		transaction.Date = block.Timestamp
 
 		adjustGasValue(*transaction)
@@ -135,31 +129,41 @@ func AdjustBlock(block *eth.Block) {
 
 	for i := 0; i < len(block.EventLogs); i++ {
 		eventLog := &block.EventLogs[i]
-		eventLog.BlockNumber = HexToIntStr(eventLog.BlockNumber)
+		eventLog.BlockNumber = hexToIntStr(eventLog.BlockNumber)
 		eventLog.Date = block.Timestamp
 		eventLog.TopicsString = strings.Join(eventLog.Topics, ", ")
 	}
 }
 
-func HexToIntStr(s string) string {
+func hexToInt(hex string) int {
+	hexWithout0x := strings.Replace(hex, "0x", "", -1)
+	parseInt, err := strconv.ParseInt(hexWithout0x, 16, 64)
+	if err != nil {
+		panic(err)
+	}
+
+	return int(parseInt)
+}
+
+func hexToIntStr(s string) string {
 	iInt64, _ := strconv.ParseInt(s, 0, 64)
 	return strconv.FormatInt(iInt64, 10)
 }
 
 func adjustGasValue(transaction eth.Transaction) {
-	gasInt, _ := strconv.Atoi(HexToIntStr(transaction.Gas))
+	gasInt, _ := strconv.Atoi(hexToIntStr(transaction.Gas))
 	gasPriceStr := (string)(gasInt / HexToIntDivisor)
 	transaction.Gas = gasPriceStr
 }
 
 func adjustGasPriceValue(transaction eth.Transaction) {
-	gasPriceInt, _ := strconv.Atoi(HexToIntStr(transaction.GasPrice))
+	gasPriceInt, _ := strconv.Atoi(hexToIntStr(transaction.GasPrice))
 	gasPriceStr := (string)(gasPriceInt / HexToIntDivisor)
 	transaction.GasPrice = gasPriceStr
 }
 
 func adjustValueInEither(transaction eth.Transaction) {
-	valueInt, _ := strconv.Atoi(HexToIntStr(transaction.Value))
+	valueInt, _ := strconv.Atoi(hexToIntStr(transaction.Value))
 	str := (string)(valueInt / HexToIntDivisor)
 
 	transaction.Value = str
