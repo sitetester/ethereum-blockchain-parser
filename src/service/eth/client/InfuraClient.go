@@ -15,7 +15,8 @@ import (
 type InfuraClient struct {
 }
 
-const URL = "https://mainnet.infura.io/v3/c8d36b72d2d04f16a94931809cdf6383"
+// Add project key here
+const URL = "https://mainnet.infura.io/v3/"
 
 type LatestBlockResponse struct {
 }
