@@ -1,4 +1,4 @@
-# blockchains-parser
+## Setup
 
 - Follow https://cloud.google.com/bigquery/docs/reference/libraries to setup `GOOGLE_APPLICATION_CREDENTIALS` environment variable
 - install needed packages e.g go get -u github.com/jinzhu/gorm
